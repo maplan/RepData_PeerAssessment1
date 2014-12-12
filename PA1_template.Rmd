@@ -19,12 +19,12 @@ barplot(height=byday$steps, names.arg=byday$date, xlab="date", ylab='steps', mai
 
 ## What is mean total number of steps taken per day?
 ```{r}
-mean(stepsday$steps, na.rm=TRUE)
+mean(byday$steps, na.rm=TRUE)
 ```
 
 ## What is the median total number of steps taken per day?
 ```{r}
-median(stepsday$steps, na.rm=TRUE)
+median(byday$steps, na.rm=TRUE)
 ```
 
 ## What is the average daily activity pattern?
@@ -36,27 +36,86 @@ trueactivity<-na.omit(activity)
 ```{r}
 trueactivity$interval <- as.factor(trueactivity$interval)
 averstepsdayinterval <- tapply(trueactivity$steps, trueactivity$interval, mean)
-# time series plot of the interval (x-axis) and the average number of steps taken
+```
+
+### time series plot of the interval (x-axis) and the average number of steps taken
+```{r}
 plot(names(averstepsdayinterval), averstepsdayinterval, type = 'l', 
 xlab = "Day Interval", ylab = "Number Steps")
 ```
 
-##the 5-minute interval with the maximum number of steps (on average)
+##the 5-minute interval with the maximum number of steps (on average) is:
 ```{r}
 max <- averstepsdayinterval[which(max(averstepsdayinterval)==averstepsdayinterval)]
-# the 5-minute interval is:
-```{r}
 names(max)
 ```
 
-#the average number of steps in tis interval is:
+##the average number of steps in this interval is:
 ```{r}
 unname(max)
 ```
+##Imputing missing values
 
-## Imputing missing values
+##1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with `NA`s)
+
+## The number of missing values is:
 ```{r}
 length(which(is.na(activity$steps) == TRUE))
 ```
+##2. Fill all the missing values in the dataset using the mean value.
+
+##3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+###Hmisc package is required 
+
+```{r}
+newactivity <- activity
+library(Hmisc)
+newactivity$imputed_steps <- with(newactivity, impute(steps, mean))
+```
+###4. Make a histogram of the total number of steps taken each day 
+
+```{r}
+bydaynew<-aggregate(imputed_steps~date, newactivity, sum)
+barplot(height=bydaynew$imputed_steps, names.arg=bydaynew$date, xlab="date", ylab='steps', main='number of steps by day')
+```
+
+##Calculate and report the **mean** and **median** total number of steps taken per day. 
+```{r}
+mean(bydaynew$imputed_steps, na.rm=TRUE)
+median(bydaynew$imputed_steps, na.rm=TRUE)
+``` 
+
+####These values does not differ much from the estimates from the first part of the assignment. This seem logic as the missing data have been filled by the mean values
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+###1. Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+
+####convert date to date Class
+
+```{r}
+newactivity$date<-as.Date(newactivity$date)
+```
+####classifiy date as weekday or weeked, applying a function
+
+```{r}
+weekdayweekend <- function(date) {
+        day <- weekdays(date)
+        if (day %in% c("lunes", "martes", "miércoles", "jueves" , "viernes")) 
+                return("weekday") 
+        else if (day %in% c("sábado", "domingo")) 
+                return("weekend") else stop("invalid date")
+}
+newactivity$day <- sapply(newactivity$date, FUN = weekdayweekend)
+```
+
+### average number of steps taken, averaged across weekdays or weekends and plot using ggplot2 so ggplot2 package is needed
+
+```{r}
+aversteps <- aggregate(imputed_steps~interval+day, newactivity, mean)
+library(ggplot2)
+ggplot(aversteps, aes(interval, imputed_steps)) + geom_line() + facet_grid(day ~ .) + xlab("5-minute interval") + ylab("Number of steps")
+```
+
+

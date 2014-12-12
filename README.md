@@ -117,7 +117,7 @@ bias into some calculations or summaries of the data.
 
 ### Are there differences in activity patterns between weekdays and weekends?
 
-For this part the `weekdays()` function may be of some help here. Use
+For this part the `weekdays` function may be of some help here. Use
 the dataset with the filled-in missing values for this part.
 
 1. Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
