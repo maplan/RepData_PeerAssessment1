@@ -1,62 +1,19 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
-
-
-## Loading and preprocessing the data
-````{r}
 setwd("~/RepData_PeerAssessment1")
 activity <- read.csv("~/RepData_PeerAssessment1/activity.csv", as.is=TRUE)
-```
-##1. Make a histogram of the total number of steps taken each day
-```{r}
 byday<-aggregate(steps~date, activity, sum)
 barplot(height=byday$steps, names.arg=byday$date, xlab="date", ylab='steps', main='number of steps by day')
-```
-
-## What is mean total number of steps taken per day?
-```{r}
+stepsday<-na.omit(byday)
 mean(stepsday$steps, na.rm=TRUE)
-```
-
-## What is the median total number of steps taken per day?
-```{r}
 median(stepsday$steps, na.rm=TRUE)
-```
-
-## What is the average daily activity pattern?
-```{r}
 trueactivity<-na.omit(activity)
-```
-
-### convert trueactivity$interval into factor
-```{r}
+# convert trueactivity$interval into factor
 trueactivity$interval <- as.factor(trueactivity$interval)
+# average number of steps taken, averaged across all days
 averstepsdayinterval <- tapply(trueactivity$steps, trueactivity$interval, mean)
 # time series plot of the interval (x-axis) and the average number of steps taken
 plot(names(averstepsdayinterval), averstepsdayinterval, type = 'l', 
 xlab = "Day Interval", ylab = "Number Steps")
-```
-
-##the 5-minute interval with the maximum number of steps (on average)
-```{r}
 max <- averstepsdayinterval[which(max(averstepsdayinterval)==averstepsdayinterval)]
-# the 5-minute interval is:
-```{r}
 names(max)
-```
-
-#the average number of steps in tis interval is:
-```{r}
 unname(max)
-```
-
-## Imputing missing values
-```{r}
 length(which(is.na(activity$steps) == TRUE))
-```
-
-## Are there differences in activity patterns between weekdays and weekends?
